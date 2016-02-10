@@ -41,5 +41,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/gvsearchresults"
         android:layout_below="@+id/actionbar"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:numColumns="4" />
 </RelativeLayout>
