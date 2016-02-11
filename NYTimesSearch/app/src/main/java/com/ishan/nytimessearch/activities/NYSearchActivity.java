@@ -1,6 +1,9 @@
 package com.ishan.nytimessearch.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -18,7 +21,6 @@ import android.widget.Toast;
 import com.ishan.nytimessearch.R;
 import com.ishan.nytimessearch.adapters.ArticleArrayAdapter;
 import com.ishan.nytimessearch.model.Article;
-import com.ishan.nytimessearch.utils.Constants;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -27,9 +29,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
+
+import static com.ishan.nytimessearch.utils.Constants.API_KEY;
+import static com.ishan.nytimessearch.utils.Constants.APP_NAME;
+import static com.ishan.nytimessearch.utils.Constants.RESP_TYPE;
+import static com.ishan.nytimessearch.utils.Constants.SEARCH_URL;
 
 public class NYSearchActivity extends AppCompatActivity {
     GridView gvSearchResults;
@@ -70,45 +78,81 @@ public class NYSearchActivity extends AppCompatActivity {
 
     }
 
+    private Boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+        return false;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_nysearch, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
+
+        MenuItem settingsItem = menu.findItem(R.id.action_settings);
+
+
+
+
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.d(Constants.APP_NAME,"query: "+query);
-                if(query!=null){
+                Log.d(APP_NAME,"query: "+query);
+                if(query!=null) {
                     AsyncHttpClient client = new AsyncHttpClient();
-                    String queryURL = Constants.SEARCH_URL + Constants.RESP_TYPE;
+                    String queryURL = SEARCH_URL + RESP_TYPE;
                     RequestParams params = new RequestParams();
-                    params.put("api-key","ffcb95b28db4e3f1dd90bef0879667a3:17:74338942");
-                    params.put("page",0);
-                    params.put("q",query);
+                    params.put("api-key", API_KEY);
+                    params.put("page", 0);
+                    params.put("q", query);
 
-                    client.get(queryURL,params,new JsonHttpResponseHandler() {
-                        @Override
-                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                            Log.d(Constants.APP_NAME,"response: "+response);
-                            JSONArray articleJSONResults = null;
-                            try {
+                    if (isOnline() && isNetworkAvailable()) {
+                        client.get(queryURL, params, new JsonHttpResponseHandler() {
+                            @Override
+                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                Log.d(APP_NAME, "response: " + response);
+                                JSONArray articleJSONResults = null;
+                                try {
 
-                                articleJSONResults = response.getJSONObject("response").getJSONArray("docs");
+                                    articleJSONResults = response.getJSONObject("response").getJSONArray("docs");
 
-                                articleArrayAdapter.addAll(Article.fromJSONArray(articleJSONResults));
+                                    articleArrayAdapter.addAll(Article.fromJSONArray(articleJSONResults));
 
-                                //articleArrayAdapter.notifyDataSetChanged();
+                                    //articleArrayAdapter.notifyDataSetChanged();
 
-                                Log.d(Constants.APP_NAME, "articles: " + articles.toString());
+                                    Log.d(APP_NAME, "articles: " + articles.toString());
 
-                            }catch(JSONException e){
-                                e.printStackTrace();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        }
-                    });
+
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                                Log.d(APP_NAME, "Failed in fetching articles " + throwable.getMessage());
+                                Toast.makeText(getApplicationContext(),"Something went wrong while fetching articles ",Toast.LENGTH_SHORT);
+
+                            }
+                        });
+                    }
+                    else
+                        Toast.makeText(getApplicationContext(),"Please check your internet connection!",Toast.LENGTH_SHORT);
                 }
+
                 else
                     Toast.makeText(NYSearchActivity.this, "Please enter a valid search string", Toast.LENGTH_SHORT).show();
                 return false;
