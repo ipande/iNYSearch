@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.StringBuilderPrinter;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -33,6 +34,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -41,12 +43,17 @@ import static com.ishan.nytimessearch.utils.Constants.APP_NAME;
 import static com.ishan.nytimessearch.utils.Constants.RESP_TYPE;
 import static com.ishan.nytimessearch.utils.Constants.SEARCH_URL;
 
-public class NYSearchActivity extends AppCompatActivity{
+public class NYSearchActivity extends AppCompatActivity implements FilterSearchFragment.FiltersEditedDialogListener{
     GridView gvSearchResults;
 
     ArrayList<Article> articles;
 
     ArticleArrayAdapter articleArrayAdapter;
+    private String newsDesk;
+    private String sortOrder;
+    private String beginDate;
+    private RequestParams params;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,10 +148,11 @@ public class NYSearchActivity extends AppCompatActivity{
                 if(query!=null) {
                     AsyncHttpClient client = new AsyncHttpClient();
                     String queryURL = SEARCH_URL + RESP_TYPE;
-                    RequestParams params = new RequestParams();
+                    params = new RequestParams();
                     params.put("api-key", API_KEY);
                     params.put("page", 0);
                     params.put("q", query);
+
 
                     if (isOnline() && isNetworkAvailable()) {
                         client.get(queryURL, params, new JsonHttpResponseHandler() {
@@ -200,4 +208,25 @@ public class NYSearchActivity extends AppCompatActivity{
         }
     }
 
+    @Override
+    public void onFinishFilters(String sortedOrder, boolean artChecked, boolean fnsCheckBoxChecked, boolean sportsCheckBoxChecked, String begDate) {
+        Log.d(APP_NAME,"sorted order:"+sortedOrder);
+        StringBuilder currParams = new StringBuilder();
+        if(sortedOrder!=null){
+            sortOrder = sortedOrder;
+            currParams.append("sort=");
+            currParams.append(sortedOrder);
+            currParams.append("&");
+        }
+        if(begDate!=null){
+            beginDate = begDate;
+            currParams.append("begin_date=");
+            currParams.append(begDate);
+            currParams.append("&");
+        }
+        if(artChecked){
+            currParams.append("news_desk=");
+
+        }
+    }
 }
