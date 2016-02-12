@@ -50,7 +50,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
     private String searchQuery;
     ArticleArrayAdapter articleArrayAdapter;
     private RequestParams params = new RequestParams();
-//    private SwipeRefreshLayout swipeContainer;
+    private SwipeRefreshLayout swipeContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +59,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
         Toolbar toolbar = (Toolbar) findViewById(R.id.actionbar);
         setSupportActionBar(toolbar);
         gvSearchResults = (GridView) findViewById(R.id.gvsearchresults);
-//        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
 
         articles = new ArrayList<>();
 
@@ -85,20 +85,20 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
         });
 
         // Setup refresh listener which triggers new data loading
-//        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-//            @Override
-//            public void onRefresh() {
-//                // Your code to refresh the list here.
-//                // Make sure you call swipeContainer.setRefreshing(false)
-//                // once the network request has completed successfully.
-//                fetchSearchResults(searchQuery);
-//            }
-//        });
-//        // Configure the refreshing colors
-//        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
-//                android.R.color.holo_green_light,
-//                android.R.color.holo_orange_light,
-//                android.R.color.holo_red_light);
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+                fetchSearchResults(searchQuery);
+            }
+        });
+        // Configure the refreshing colors
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
 
 
     }
@@ -122,9 +122,12 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
                         JSONArray articleJSONResults = null;
                         try {
 
+                            articleArrayAdapter.clear();
+
                             articleJSONResults = response.getJSONObject("response").getJSONArray("docs");
 
                             articleArrayAdapter.addAll(Article.fromJSONArray(articleJSONResults));
+                            swipeContainer.setRefreshing(false);
 
                             Log.d(APP_NAME, "articles: " + articles.toString());
 
@@ -135,6 +138,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                         Log.d(APP_NAME, "Failed in fetching articles " + throwable.getMessage());
+                        swipeContainer.setRefreshing(false);
                         Toast.makeText(getApplicationContext(),"Something went wrong while fetching articles ",Toast.LENGTH_SHORT);
                     }
                 });
@@ -204,6 +208,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                swipeContainer.setRefreshing(true);
                 fetchSearchResults(query);
                 return false;
             }
