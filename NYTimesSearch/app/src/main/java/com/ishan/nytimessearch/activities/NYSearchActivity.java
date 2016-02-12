@@ -7,11 +7,11 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.StringBuilderPrinter;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,7 +34,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 import cz.msebera.android.httpclient.Header;
@@ -48,22 +47,20 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
     GridView gvSearchResults;
 
     ArrayList<Article> articles;
-
+    private String searchQuery;
     ArticleArrayAdapter articleArrayAdapter;
-    private String newsDesk;
-    private String sortOrder;
-    private String beginDate;
     private RequestParams params = new RequestParams();
-
+//    private SwipeRefreshLayout swipeContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nysearch);
         Toolbar toolbar = (Toolbar) findViewById(R.id.actionbar);
         setSupportActionBar(toolbar);
         gvSearchResults = (GridView) findViewById(R.id.gvsearchresults);
+//        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+
         articles = new ArrayList<>();
 
         articleArrayAdapter = new ArticleArrayAdapter(this,articles);
@@ -87,6 +84,68 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
             }
         });
 
+        // Setup refresh listener which triggers new data loading
+//        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+//            @Override
+//            public void onRefresh() {
+//                // Your code to refresh the list here.
+//                // Make sure you call swipeContainer.setRefreshing(false)
+//                // once the network request has completed successfully.
+//                fetchSearchResults(searchQuery);
+//            }
+//        });
+//        // Configure the refreshing colors
+//        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+//                android.R.color.holo_green_light,
+//                android.R.color.holo_orange_light,
+//                android.R.color.holo_red_light);
+
+
+    }
+
+    private void fetchSearchResults(String query) {
+        Log.d(APP_NAME,"query: "+query);
+        searchQuery = query;
+        if(query!=null) {
+            AsyncHttpClient client = new AsyncHttpClient();
+            String queryURL = SEARCH_URL + RESP_TYPE;
+            //params = new RequestParams();
+            params.put("api-key", API_KEY);
+            params.put("page", 0);
+            params.put("q", query);
+            if (isOnline() && isNetworkAvailable()) {
+
+                client.get(queryURL, params, new JsonHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        Log.d(APP_NAME, "response: " + response);
+                        JSONArray articleJSONResults = null;
+                        try {
+
+                            articleJSONResults = response.getJSONObject("response").getJSONArray("docs");
+
+                            articleArrayAdapter.addAll(Article.fromJSONArray(articleJSONResults));
+
+                            Log.d(APP_NAME, "articles: " + articles.toString());
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                        Log.d(APP_NAME, "Failed in fetching articles " + throwable.getMessage());
+                        Toast.makeText(getApplicationContext(),"Something went wrong while fetching articles ",Toast.LENGTH_SHORT);
+                    }
+                });
+            }
+            else {
+                Log.d(APP_NAME, "No internet connection ");
+                Toast.makeText(getApplicationContext(), "Please check your internet connection!", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else
+            Toast.makeText(NYSearchActivity.this, "Please enter a valid search string", Toast.LENGTH_SHORT).show();
     }
 
     private Boolean isNetworkAvailable() {
@@ -145,51 +204,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.d(APP_NAME,"query: "+query);
-                if(query!=null) {
-                    AsyncHttpClient client = new AsyncHttpClient();
-                    String queryURL = SEARCH_URL + RESP_TYPE;
-                    //params = new RequestParams();
-                    params.put("api-key", API_KEY);
-                    params.put("page", 0);
-                    params.put("q", query);
-
-
-                    if (isOnline() && isNetworkAvailable()) {
-                        client.get(queryURL, params, new JsonHttpResponseHandler() {
-                            @Override
-                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                                Log.d(APP_NAME, "response: " + response);
-                                JSONArray articleJSONResults = null;
-                                try {
-
-                                    articleJSONResults = response.getJSONObject("response").getJSONArray("docs");
-
-                                    articleArrayAdapter.addAll(Article.fromJSONArray(articleJSONResults));
-
-                                    //articleArrayAdapter.notifyDataSetChanged();
-
-                                    Log.d(APP_NAME, "articles: " + articles.toString());
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                                Log.d(APP_NAME, "Failed in fetching articles " + throwable.getMessage());
-                                Toast.makeText(getApplicationContext(),"Something went wrong while fetching articles ",Toast.LENGTH_SHORT);
-
-                            }
-                        });
-                    }
-                    else
-                        Toast.makeText(getApplicationContext(),"Please check your internet connection!",Toast.LENGTH_SHORT);
-                }
-
-                else
-                    Toast.makeText(NYSearchActivity.this, "Please enter a valid search string", Toast.LENGTH_SHORT).show();
+                fetchSearchResults(query);
                 return false;
             }
 
@@ -213,11 +228,9 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
     public void onFinishFilters(String sortedOrder, boolean artChecked, boolean fnsCheckBoxChecked, boolean sportsCheckBoxChecked, String begDate) {
         Log.d(APP_NAME,"sorted order:"+sortedOrder);
         if(sortedOrder!=null){
-            sortOrder = sortedOrder;
             params.put("sort",sortedOrder);
         }
         if(begDate!=null){
-            beginDate = begDate;
             params.put("begin_date",begDate);
 
         }
@@ -226,7 +239,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
             hashMap.put("news_desk","Arts");
         }
         if(fnsCheckBoxChecked){
-            hashMap.put("news_desk",hashMap.get("news_desk") + "&" + "Fashion & Style");
+            hashMap.put("news_desk",hashMap.get("news_desk") + "&" + "Fashion");
         }
         if(sportsCheckBoxChecked){
             hashMap.put("news_desk",hashMap.get("news_desk") + "&" + "Sports");
