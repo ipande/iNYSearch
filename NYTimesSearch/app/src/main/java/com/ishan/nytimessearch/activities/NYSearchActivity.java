@@ -1,6 +1,5 @@
 package com.ishan.nytimessearch.activities;
 
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -17,7 +16,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.DatePicker;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -35,7 +33,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -44,7 +41,7 @@ import static com.ishan.nytimessearch.utils.Constants.APP_NAME;
 import static com.ishan.nytimessearch.utils.Constants.RESP_TYPE;
 import static com.ishan.nytimessearch.utils.Constants.SEARCH_URL;
 
-public class NYSearchActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
+public class NYSearchActivity extends AppCompatActivity{
     GridView gvSearchResults;
 
     ArrayList<Article> articles;
@@ -53,6 +50,7 @@ public class NYSearchActivity extends AppCompatActivity implements DatePickerDia
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nysearch);
         Toolbar toolbar = (Toolbar) findViewById(R.id.actionbar);
@@ -114,7 +112,7 @@ public class NYSearchActivity extends AppCompatActivity implements DatePickerDia
     }
 
     public void showDatePickerDialog() {
-        DatePickerFragment newFragment = new DatePickerFragment();
+        DatePickerFragment newFragment = DatePickerFragment.newInstance("Pick Date");
         newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 
@@ -198,17 +196,8 @@ public class NYSearchActivity extends AppCompatActivity implements DatePickerDia
     public void onDatePickerClicked(View view) {
         if(view.getId() == R.id.etDate){
             Log.d(APP_NAME,"Launch Date Picker Dialogue");
-            //showDatePickerDialog();
+            showDatePickerDialog();
         }
     }
 
-    @Override
-    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-        final Calendar c = Calendar.getInstance();
-        c.set(Calendar.YEAR, year);
-        c.set(Calendar.MONTH, monthOfYear);
-        c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        Log.d(APP_NAME,"Date set");
-
-    }
 }

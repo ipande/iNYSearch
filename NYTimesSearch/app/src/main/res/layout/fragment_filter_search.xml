@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/ate">
+    android:id="@+id/filterFrag">
 
 
     <TextView
@@ -96,4 +96,13 @@
         android:layout_toRightOf="@+id/tvBeginDate"
         android:layout_toEndOf="@+id/tvBeginDate"
         android:onClick="onDatePickerClicked"/>
+
+    <DatePicker
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/datePicker"
+        android:layout_alignParentTop="true"
+        android:visibility="invisible"
+        android:layout_toRightOf="@+id/tvBeginDate"
+        android:layout_toEndOf="@+id/tvBeginDate" />
 </RelativeLayout>

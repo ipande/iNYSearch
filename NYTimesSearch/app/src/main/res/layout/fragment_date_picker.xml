@@ -5,10 +5,19 @@
     tools:context="com.ishan.nytimessearch.fragments.DatePickerFragment">
 
 
-    <!--<DatePicker-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:id="@+id/dpBeginDate"-->
-        <!--android:layout_alignParentTop="true"-->
-        <!--android:layout_centerHorizontal="true" />-->
+    <DatePicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/dpBeginDate"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:id="@+id/btPickDate"
+        android:layout_below="@+id/dpBeginDate"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

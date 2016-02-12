@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.ishan.nytimessearch.R;
+import com.ishan.nytimessearch.fragments.DatePickerFragment;
 import com.ishan.nytimessearch.utils.Constants;
 
 import java.util.Calendar;
@@ -24,10 +26,12 @@ import java.util.Calendar;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
+import static com.ishan.nytimessearch.utils.Constants.APP_NAME;
+
 /**
  * A simple {@link Fragment} subclass.
  */
-public class FilterSearchFragment extends DialogFragment{
+public class FilterSearchFragment extends DialogFragment implements DatePickerFragment.DateEditedDialogListener{
     @Bind(R.id.etDate) EditText etDate;
     private CheckBox artCheckBox;
     private CheckBox fnsCheckBox;
@@ -57,7 +61,6 @@ public class FilterSearchFragment extends DialogFragment{
     }
 
     @Override
-
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // Get field from view
@@ -80,8 +83,17 @@ public class FilterSearchFragment extends DialogFragment{
 
         // Show soft keyboard automatically and request focus to field
         etDate.requestFocus();
-        getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
     }
 
+    public String dateToString(int mm, int dd, int yy){
+        return Integer.toString(mm) + " / " + Integer.toString(dd) + " / " + Integer.toString(yy);
+    }
+
+    @Override
+    public void onFinishDateDialog(int mm, int dd, int yy) {
+
+        Log.d(APP_NAME,"hmmmmmm "+mm +" dd "+dd + " yy "+yy);
+        etDate.setText(dateToString(mm,dd,yy));
+    }
 }
