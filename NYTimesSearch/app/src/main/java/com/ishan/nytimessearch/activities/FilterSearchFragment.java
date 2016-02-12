@@ -128,7 +128,7 @@ public class FilterSearchFragment extends DialogFragment implements DatePickerFr
     public void onFinishDateDialog(int mm, int dd, int yy) {
 
         Log.d(APP_NAME,"hmmmmmm "+mm +" dd "+dd + " yy "+yy);
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMDD");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         Calendar cal = Calendar.getInstance();
         cal.set(yy,mm,dd);
         beginDate = sdf.format(cal.getTime());

@@ -35,6 +35,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -52,7 +53,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
     private String newsDesk;
     private String sortOrder;
     private String beginDate;
-    private RequestParams params;
+    private RequestParams params = new RequestParams();
 
 
     @Override
@@ -148,7 +149,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
                 if(query!=null) {
                     AsyncHttpClient client = new AsyncHttpClient();
                     String queryURL = SEARCH_URL + RESP_TYPE;
-                    params = new RequestParams();
+                    //params = new RequestParams();
                     params.put("api-key", API_KEY);
                     params.put("page", 0);
                     params.put("q", query);
@@ -211,22 +212,26 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
     @Override
     public void onFinishFilters(String sortedOrder, boolean artChecked, boolean fnsCheckBoxChecked, boolean sportsCheckBoxChecked, String begDate) {
         Log.d(APP_NAME,"sorted order:"+sortedOrder);
-        StringBuilder currParams = new StringBuilder();
         if(sortedOrder!=null){
             sortOrder = sortedOrder;
-            currParams.append("sort=");
-            currParams.append(sortedOrder);
-            currParams.append("&");
+            params.put("sort",sortedOrder);
         }
         if(begDate!=null){
             beginDate = begDate;
-            currParams.append("begin_date=");
-            currParams.append(begDate);
-            currParams.append("&");
-        }
-        if(artChecked){
-            currParams.append("news_desk=");
+            params.put("begin_date",begDate);
 
         }
+        HashMap<String,String> hashMap = new HashMap<>();
+        if(artChecked){
+            hashMap.put("news_desk","Arts");
+        }
+        if(fnsCheckBoxChecked){
+            hashMap.put("news_desk",hashMap.get("news_desk") + "&" + "Fashion & Style");
+        }
+        if(sportsCheckBoxChecked){
+            hashMap.put("news_desk",hashMap.get("news_desk") + "&" + "Sports");
+        }
+        if(hashMap.size()!=0)
+            params.put("news_desk",hashMap.get("news_desk"));
     }
 }
