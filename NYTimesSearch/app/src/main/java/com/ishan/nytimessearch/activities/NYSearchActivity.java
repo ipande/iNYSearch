@@ -1,10 +1,12 @@
 package com.ishan.nytimessearch.activities;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -15,11 +17,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.DatePicker;
 import android.widget.GridView;
 import android.widget.Toast;
 
 import com.ishan.nytimessearch.R;
 import com.ishan.nytimessearch.adapters.ArticleArrayAdapter;
+import com.ishan.nytimessearch.fragments.DatePickerFragment;
 import com.ishan.nytimessearch.model.Article;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -31,6 +35,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -39,7 +44,7 @@ import static com.ishan.nytimessearch.utils.Constants.APP_NAME;
 import static com.ishan.nytimessearch.utils.Constants.RESP_TYPE;
 import static com.ishan.nytimessearch.utils.Constants.SEARCH_URL;
 
-public class NYSearchActivity extends AppCompatActivity {
+public class NYSearchActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
     GridView gvSearchResults;
 
     ArrayList<Article> articles;
@@ -94,6 +99,29 @@ public class NYSearchActivity extends AppCompatActivity {
         } catch (IOException e)          { e.printStackTrace(); }
         catch (InterruptedException e) { e.printStackTrace(); }
         return false;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.action_settings:
+                showFilterDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
+
+    public void showDatePickerDialog() {
+        DatePickerFragment newFragment = new DatePickerFragment();
+        newFragment.show(getSupportFragmentManager(), "datePicker");
+    }
+
+    private void showFilterDialog() {
+        FragmentManager fm = getSupportFragmentManager();
+        FilterSearchFragment fragment = FilterSearchFragment.newInstance("Filter Search Options");
+        fragment.show(fm,"Search Options");
     }
 
     @Override
@@ -165,5 +193,22 @@ public class NYSearchActivity extends AppCompatActivity {
         });
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    public void onDatePickerClicked(View view) {
+        if(view.getId() == R.id.etDate){
+            Log.d(APP_NAME,"Launch Date Picker Dialogue");
+            //showDatePickerDialog();
+        }
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        final Calendar c = Calendar.getInstance();
+        c.set(Calendar.YEAR, year);
+        c.set(Calendar.MONTH, monthOfYear);
+        c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        Log.d(APP_NAME,"Date set");
+
     }
 }

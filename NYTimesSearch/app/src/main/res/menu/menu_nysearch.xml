@@ -4,7 +4,6 @@
     tools:context=".activities.NYSearchActivity">
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
-        android:icon="@android:drawable/action_settings"
         android:orderInCategory="100"
         app:showAsAction="never" />
     <item android:id="@+id/action_search"
