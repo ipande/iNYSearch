@@ -104,8 +104,8 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
     }
 
     private void fetchSearchResults(String query) {
-        Log.d(APP_NAME,"query: "+query);
         searchQuery = query;
+        Log.d(APP_NAME,"query: "+searchQuery);
         if(query!=null) {
             AsyncHttpClient client = new AsyncHttpClient();
             String queryURL = SEARCH_URL + RESP_TYPE;
