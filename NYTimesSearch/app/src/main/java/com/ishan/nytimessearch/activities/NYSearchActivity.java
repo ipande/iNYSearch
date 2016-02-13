@@ -9,7 +9,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -22,6 +25,7 @@ import android.widget.Toast;
 
 import com.ishan.nytimessearch.R;
 import com.ishan.nytimessearch.adapters.ArticleArrayAdapter;
+import com.ishan.nytimessearch.adapters.ArticleRVAdapter;
 import com.ishan.nytimessearch.fragments.DatePickerFragment;
 import com.ishan.nytimessearch.model.Article;
 import com.loopj.android.http.AsyncHttpClient;
@@ -48,9 +52,13 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
 
     ArrayList<Article> articles;
     private String searchQuery;
-    ArticleArrayAdapter articleArrayAdapter;
+//    ArticleArrayAdapter articleArrayAdapter;
+    private ArticleRVAdapter articleAdapter;
     private RequestParams params = new RequestParams();
     private SwipeRefreshLayout swipeContainer;
+
+    private RecyclerView recyclerView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,11 +68,20 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
         setSupportActionBar(toolbar);
         gvSearchResults = (GridView) findViewById(R.id.gvsearchresults);
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        recyclerView = (RecyclerView) findViewById(R.id.rvArticles);
 
         articles = new ArrayList<>();
 
-        articleArrayAdapter = new ArticleArrayAdapter(this,articles);
-        gvSearchResults.setAdapter(articleArrayAdapter);
+        articleAdapter = new ArticleRVAdapter(articles,this);
+        //articleArrayAdapter = new ArticleArrayAdapter(this,articles);
+
+        recyclerView.setAdapter(articleAdapter);
+
+        // First param is number of columns and second param is orientation i.e Vertical or Horizontal
+        StaggeredGridLayoutManager gridLayoutManager =
+                new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(gridLayoutManager);
+        //gvSearchResults.setAdapter(articleArrayAdapter);
 
         gvSearchResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -122,11 +139,12 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
                         JSONArray articleJSONResults = null;
                         try {
 
-                            articleArrayAdapter.clear();
+//                            articleAdapter.clear//TODO how to clear?
 
                             articleJSONResults = response.getJSONObject("response").getJSONArray("docs");
+                            articles.addAll(Article.fromJSONArray(articleJSONResults));
 
-                            articleArrayAdapter.addAll(Article.fromJSONArray(articleJSONResults));
+                            articleAdapter.notifyDataSetChanged();
                             swipeContainer.setRefreshing(false);
 
                             Log.d(APP_NAME, "articles: " + articles.toString());
