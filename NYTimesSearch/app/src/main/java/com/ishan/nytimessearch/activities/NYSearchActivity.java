@@ -28,6 +28,7 @@ import com.ishan.nytimessearch.adapters.ArticleArrayAdapter;
 import com.ishan.nytimessearch.adapters.ArticleRVAdapter;
 import com.ishan.nytimessearch.fragments.DatePickerFragment;
 import com.ishan.nytimessearch.model.Article;
+import com.ishan.nytimessearch.utils.EndlessRecyclerViewScrollListener;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -55,6 +56,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
 //    ArticleArrayAdapter articleArrayAdapter;
     private ArticleRVAdapter articleAdapter;
     private RequestParams params = new RequestParams();
+    ArrayList<Article> results = null;
     private SwipeRefreshLayout swipeContainer;
 
     private RecyclerView recyclerView;
@@ -81,6 +83,13 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
         StaggeredGridLayoutManager gridLayoutManager =
                 new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(gridLayoutManager);
+        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(gridLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                customLoadMoreDataFromApi(searchQuery,page);
+            }
+        });
+
         //gvSearchResults.setAdapter(articleArrayAdapter);
 
         gvSearchResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -108,7 +117,8 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
-                fetchSearchResults(searchQuery);
+//                fetchSearchResults(searchQuery,0);
+                customLoadMoreDataFromApi(searchQuery,0);
             }
         });
         // Configure the refreshing colors
@@ -120,15 +130,34 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
 
     }
 
-    private void fetchSearchResults(String query) {
+    // Append more data into the adapter
+    // This method probably sends out a network request and appends new data items to your adapter.
+    public void customLoadMoreDataFromApi(String searchQuery,int offset) {
+        // Send an API request to retrieve appropriate data using the offset value as a parameter.
+        // Deserialize API response and then construct new objects to append to the adapter
+        // Add the new objects to the data source for the adapter
+        fetchSearchResults(searchQuery,offset);
+        if(results!=null)
+            articles.addAll(results);
+        else
+            Log.d(APP_NAME,"Results are null");
+
+        // For efficiency purposes, notify the adapter of only the elements that got changed
+        // curSize will equal to the index of the first element inserted because the list is 0-indexed
+        int curSize = articleAdapter.getItemCount();
+        articleAdapter.notifyItemRangeInserted(curSize, articles.size() - 1);
+    }
+
+    private ArrayList<Article> fetchSearchResults(String query, int pageNum) {
         searchQuery = query;
         Log.d(APP_NAME,"query: "+searchQuery);
+        results = null;
         if(query!=null) {
             AsyncHttpClient client = new AsyncHttpClient();
             String queryURL = SEARCH_URL + RESP_TYPE;
             //params = new RequestParams();
             params.put("api-key", API_KEY);
-            params.put("page", 0);
+            params.put("page", pageNum);
             params.put("q", query);
             if (isOnline() && isNetworkAvailable()) {
 
@@ -147,8 +176,10 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
                             articleAdapter.notifyDataSetChanged();
                             swipeContainer.setRefreshing(false);
 
-                            Log.d(APP_NAME, "articles: " + articles.toString());
 
+                            //TODO:here
+                            results = Article.fromJSONArray(articleJSONResults);
+                            Log.d(APP_NAME, "results: " + results.toString());
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -168,6 +199,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
         }
         else
             Toast.makeText(NYSearchActivity.this, "Please enter a valid search string", Toast.LENGTH_SHORT).show();
+        return results;
     }
 
     private Boolean isNetworkAvailable() {
@@ -227,7 +259,9 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
             @Override
             public boolean onQueryTextSubmit(String query) {
                 swipeContainer.setRefreshing(true);
-                fetchSearchResults(query);
+
+//                articleAdapter.clearData();
+                customLoadMoreDataFromApi(query,0);
                 return false;
             }
 
@@ -246,6 +280,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
             showDatePickerDialog();
         }
     }
+
 
     @Override
     public void onFinishFilters(String sortedOrder, boolean artChecked, boolean fnsCheckBoxChecked, boolean sportsCheckBoxChecked, String begDate) {

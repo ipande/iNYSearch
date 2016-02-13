@@ -72,6 +72,17 @@ public class ArticleRVAdapter extends RecyclerView.Adapter<ArticleRVAdapter.View
         }
     }
 
+    public void clearData() {
+        if(mArticles!=null) {
+            if (mArticles.size() > 0) {
+                for (int i = 0; i < mArticles.size() -1; i++) {
+                    mArticles.remove(i);
+                }
+                notifyItemRangeRemoved(0, mArticles.size());
+            }
+        }
+    }
+
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
