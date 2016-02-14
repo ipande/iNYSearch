@@ -68,7 +68,8 @@ public class ArticleRVAdapter extends RecyclerView.Adapter<ArticleRVAdapter.View
         String thumbnail = article.getThumbNail();
 
         if(!TextUtils.isEmpty(thumbnail)){
-            Picasso.with(mContext).load(thumbnail).into(imageView);
+            Picasso.with(mContext).load(thumbnail).fit().placeholder(R.drawable.loading_spinner).
+                    into(imageView);
         }
     }
 

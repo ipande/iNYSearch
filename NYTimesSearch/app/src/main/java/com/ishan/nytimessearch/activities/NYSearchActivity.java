@@ -259,8 +259,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
             @Override
             public boolean onQueryTextSubmit(String query) {
                 swipeContainer.setRefreshing(true);
-
-//                articleAdapter.clearData();
+                articleAdapter.clearData();
                 customLoadMoreDataFromApi(query,0);
                 return false;
             }
