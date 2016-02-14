@@ -96,7 +96,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
-//                fetchSearchResults(searchQuery,0);
+//                fetchSearch3Results(searchQuery,0);
                 customLoadMoreDataFromApi(searchQuery,0);
             }
         });

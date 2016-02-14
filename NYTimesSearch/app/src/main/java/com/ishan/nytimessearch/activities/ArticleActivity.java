@@ -40,25 +40,25 @@ public class ArticleActivity extends AppCompatActivity {
             webView.loadUrl(article.getWebURL());
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        MenuInflater inflater = getMenuInflater();
-//        inflater.inflate(R.menu.menu_article, menu);
-//
-//        MenuItem item = menu.findItem(R.id.menu_item_share);
-//        ShareActionProvider miShare = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-//        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-//        shareIntent.setType("text/plain");
-//
-//        // get reference to WebView
-//        WebView wvArticle = (WebView) findViewById(R.id.wvArticle);
-//        // pass in the URL currently being used by the WebView
-//        shareIntent.putExtra(Intent.EXTRA_TEXT, wvArticle.getUrl());
-//
-////        miShare.setShareIntent(shareIntent);
-//        return super.onCreateOptionsMenu(menu);
-//
-//    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_article, menu);
+
+        MenuItem item = menu.findItem(R.id.menu_item_share);
+        ShareActionProvider miShare = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+
+        // get reference to WebView
+        WebView wvArticle = (WebView) findViewById(R.id.wvArticle);
+        // pass in the URL currently being used by the WebView
+        shareIntent.putExtra(Intent.EXTRA_TEXT, wvArticle.getUrl());
+
+        miShare.setShareIntent(shareIntent);
+        return super.onCreateOptionsMenu(menu);
+
+    }
 
     // Call to update the share intent
     private void setShareIntent(Intent shareIntent) {
