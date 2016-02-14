@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -24,7 +23,6 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.ishan.nytimessearch.R;
-import com.ishan.nytimessearch.adapters.ArticleArrayAdapter;
 import com.ishan.nytimessearch.adapters.ArticleRVAdapter;
 import com.ishan.nytimessearch.fragments.DatePickerFragment;
 import com.ishan.nytimessearch.model.Article;
@@ -49,7 +47,7 @@ import static com.ishan.nytimessearch.utils.Constants.RESP_TYPE;
 import static com.ishan.nytimessearch.utils.Constants.SEARCH_URL;
 
 public class NYSearchActivity extends AppCompatActivity implements FilterSearchFragment.FiltersEditedDialogListener{
-    GridView gvSearchResults;
+//    GridView gvSearchResults;
 
     ArrayList<Article> articles;
     private String searchQuery;
@@ -68,7 +66,7 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
         setContentView(R.layout.activity_nysearch);
         Toolbar toolbar = (Toolbar) findViewById(R.id.actionbar);
         setSupportActionBar(toolbar);
-        gvSearchResults = (GridView) findViewById(R.id.gvsearchresults);
+//        gvSearchResults = (GridView) findViewById(R.id.gvsearchresults);
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
         recyclerView = (RecyclerView) findViewById(R.id.rvArticles);
 
@@ -83,30 +81,11 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
         StaggeredGridLayoutManager gridLayoutManager =
                 new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(gridLayoutManager);
+        recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(gridLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 customLoadMoreDataFromApi(searchQuery,page);
-            }
-        });
-
-        //gvSearchResults.setAdapter(articleArrayAdapter);
-
-        gvSearchResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // create an intent to display the article
-                Intent displayArticleIntent = new Intent(getApplicationContext(),ArticleActivity.class);
-
-                // get the article to display
-                Article article = articles.get(position);
-
-                // pass in that article into the intent
-                displayArticleIntent.putExtra("article",article);
-
-                // launch the activity
-                startActivity(displayArticleIntent);
-
             }
         });
 

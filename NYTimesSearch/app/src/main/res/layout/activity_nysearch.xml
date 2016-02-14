@@ -9,10 +9,7 @@
     tools:context=".activities.NYSearchActivity">
     android:id="@+id/nySearchActivity">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rvArticles"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+
 
 
     <android.support.design.widget.AppBarLayout
@@ -33,20 +30,19 @@
         <include layout="@layout/content_nysearch"
             android:id="@+id/searchbar" />
     </android.support.design.widget.AppBarLayout>
-
     <android.support.v4.widget.SwipeRefreshLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swipeContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <GridView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/gvsearchresults"
-            android:layout_below="@+id/actionbar"
-            android:layout_centerHorizontal="true"
-            android:numColumns="4" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rvArticles"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"/>
     </android.support.v4.widget.SwipeRefreshLayout>
+
+
 </android.support.design.widget.CoordinatorLayout>
 
 
