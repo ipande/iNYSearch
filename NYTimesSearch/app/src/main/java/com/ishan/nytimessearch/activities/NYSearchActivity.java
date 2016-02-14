@@ -155,7 +155,6 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
         if(query!=null) {
             AsyncHttpClient client = new AsyncHttpClient();
             String queryURL = SEARCH_URL + RESP_TYPE;
-            //params = new RequestParams();
             params.put("api-key", API_KEY);
             params.put("page", pageNum);
             params.put("q", query);
@@ -167,9 +166,6 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
                         Log.d(APP_NAME, "response: " + response);
                         JSONArray articleJSONResults = null;
                         try {
-
-//                            articleAdapter.clear//TODO how to clear?
-
                             articleJSONResults = response.getJSONObject("response").getJSONArray("docs");
                             articles.addAll(Article.fromJSONArray(articleJSONResults));
 
