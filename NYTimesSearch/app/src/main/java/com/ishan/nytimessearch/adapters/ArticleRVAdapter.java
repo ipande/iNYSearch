@@ -2,6 +2,8 @@ package com.ishan.nytimessearch.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,7 +18,9 @@ import com.ishan.nytimessearch.R;
 import com.ishan.nytimessearch.activities.ArticleActivity;
 import com.ishan.nytimessearch.model.Article;
 import com.ishan.nytimessearch.utils.Constants;
+import com.ishan.nytimessearch.utils.DynamicHeightImageView;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.List;
 
@@ -26,7 +30,8 @@ public class ArticleRVAdapter extends RecyclerView.Adapter<ArticleRVAdapter.View
     private static List<Article> mArticles;
     private Context mContext;
 
-    // Pass in the contact array into the constructor
+
+        // Pass in the contact array into the constructor
     public ArticleRVAdapter(List<Article> articles,Context context) {
         mArticles = articles;
         mContext = context;
@@ -72,8 +77,12 @@ public class ArticleRVAdapter extends RecyclerView.Adapter<ArticleRVAdapter.View
         String thumbnail = article.getThumbNail();
 
         if(!TextUtils.isEmpty(thumbnail)){
+            viewHolder.imageView.setHeightRatio(((double)article.getHeight())/article.getWidth());
             Picasso.with(mContext).load(thumbnail).fit().placeholder(R.drawable.loading_spinner).
                     into(imageView);
+        }
+        else{
+            viewHolder.imageView.setImageResource(R.drawable.error_icon);
         }
     }
 
@@ -87,11 +96,12 @@ public class ArticleRVAdapter extends RecyclerView.Adapter<ArticleRVAdapter.View
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,Target{
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
         public TextView tvTitle;
-        public ImageView imageView;
+        public DynamicHeightImageView imageView;
+
         public Context context;
 
         // We also create a constructor that accepts the entire item row
@@ -103,9 +113,29 @@ public class ArticleRVAdapter extends RecyclerView.Adapter<ArticleRVAdapter.View
 
             // Lookup view for data population
             tvTitle = (TextView) itemView.findViewById(R.id.tvTitle);
-            imageView = (ImageView) itemView.findViewById(R.id.ivImage);
+            imageView = (DynamicHeightImageView) itemView.findViewById(R.id.ivImage);
             itemView.setOnClickListener(this);
             this.context = context;
+        }
+
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            // Calculate the image ratio of the loaded bitmap
+            float ratio = (float) bitmap.getHeight() / (float) bitmap.getWidth();
+            // Set the ratio for the image
+            imageView.setHeightRatio(ratio);
+            // Load the image into the view
+            imageView.setImageBitmap(bitmap);
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+            imageView.setImageResource(R.drawable.error_icon);
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
         }
 
         @Override

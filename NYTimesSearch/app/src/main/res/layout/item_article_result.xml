@@ -5,7 +5,7 @@
     android:clickable="true"
     android:background="?android:attr/selectableItemBackground">
 
-    <ImageView
+    <com.ishan.nytimessearch.utils.DynamicHeightImageView
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:id="@+id/ivImage"

@@ -81,7 +81,6 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
         StaggeredGridLayoutManager gridLayoutManager =
                 new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(gridLayoutManager);
-        recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(gridLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
@@ -96,7 +95,6 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
-//                fetchSearch3Results(searchQuery,0);
                 customLoadMoreDataFromApi(searchQuery,0);
             }
         });
@@ -152,7 +150,6 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
                             swipeContainer.setRefreshing(false);
 
 
-                            //TODO:here
                             results = Article.fromJSONArray(articleJSONResults);
                             Log.d(APP_NAME, "results: " + results.toString());
                         } catch (JSONException e) {
