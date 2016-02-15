@@ -1,0 +1,196 @@
+diff --git a/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/activities/ArticleActivity.java b/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/activities/ArticleActivity.java
+index 96f8a26..a1a9fec 100644
+--- a/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/activities/ArticleActivity.java
++++ b/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/activities/ArticleActivity.java
+@@ -2,6 +2,7 @@ package com.ishan.nytimessearch.activities;
+ 
+ import android.content.Intent;
+ import android.os.Bundle;
++import android.support.annotation.Nullable;
+ import android.support.v4.view.MenuItemCompat;
+ import android.support.v7.app.AppCompatActivity;
+ import android.support.v7.widget.ShareActionProvider;
+@@ -15,18 +16,23 @@ import android.webkit.WebViewClient;
+ import com.ishan.nytimessearch.R;
+ import com.ishan.nytimessearch.model.Article;
+ 
++import butterknife.Bind;
++import butterknife.ButterKnife;
++
+ public class ArticleActivity extends AppCompatActivity {
+     private ShareActionProvider mShareActionProvider;
++    @Nullable @Bind(R.id.toolbar) Toolbar toolbar;
++    @Nullable @Bind(R.id.wvArticle) WebView webView;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_article);
+-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
++        ButterKnife.bind(this);
+         setSupportActionBar(toolbar);
+ 
+         Article article = (Article)getIntent().getSerializableExtra("article");
+-        WebView webView = (WebView) findViewById(R.id.wvArticle);
++
+         webView.setWebViewClient(new WebViewClient(){
+             @Override
+             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+@@ -44,16 +50,15 @@ public class ArticleActivity extends AppCompatActivity {
+     public boolean onCreateOptionsMenu(Menu menu) {
+         MenuInflater inflater = getMenuInflater();
+         inflater.inflate(R.menu.menu_article, menu);
++        ButterKnife.bind(this);
+ 
+         MenuItem item = menu.findItem(R.id.menu_item_share);
+         ShareActionProvider miShare = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+         Intent shareIntent = new Intent(Intent.ACTION_SEND);
+         shareIntent.setType("text/plain");
+ 
+-        // get reference to WebView
+-        WebView wvArticle = (WebView) findViewById(R.id.wvArticle);
+         // pass in the URL currently being used by the WebView
+-        shareIntent.putExtra(Intent.EXTRA_TEXT, wvArticle.getUrl());
++        shareIntent.putExtra(Intent.EXTRA_TEXT, webView.getUrl());
+ 
+         miShare.setShareIntent(shareIntent);
+         return super.onCreateOptionsMenu(menu);
+diff --git a/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/activities/NYSearchActivity.java b/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/activities/NYSearchActivity.java
+index fef19e3..4b69904 100644
+--- a/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/activities/NYSearchActivity.java
++++ b/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/activities/NYSearchActivity.java
+@@ -1,10 +1,10 @@
+ package com.ishan.nytimessearch.activities;
+ 
+ import android.content.Context;
+-import android.content.Intent;
+ import android.net.ConnectivityManager;
+ import android.net.NetworkInfo;
+ import android.os.Bundle;
++import android.support.annotation.Nullable;
+ import android.support.v4.app.FragmentManager;
+ import android.support.v4.view.MenuItemCompat;
+ import android.support.v4.widget.SwipeRefreshLayout;
+@@ -18,8 +18,6 @@ import android.view.Menu;
+ import android.view.MenuInflater;
+ import android.view.MenuItem;
+ import android.view.View;
+-import android.widget.AdapterView;
+-import android.widget.GridView;
+ import android.widget.Toast;
+ 
+ import com.ishan.nytimessearch.R;
+@@ -39,6 +37,8 @@ import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.HashMap;
+ 
++import butterknife.Bind;
++import butterknife.ButterKnife;
+ import cz.msebera.android.httpclient.Header;
+ 
+ import static com.ishan.nytimessearch.utils.Constants.API_KEY;
+@@ -47,39 +47,34 @@ import static com.ishan.nytimessearch.utils.Constants.RESP_TYPE;
+ import static com.ishan.nytimessearch.utils.Constants.SEARCH_URL;
+ 
+ public class NYSearchActivity extends AppCompatActivity implements FilterSearchFragment.FiltersEditedDialogListener{
+-//    GridView gvSearchResults;
+ 
+     ArrayList<Article> articles;
+     private String searchQuery;
+-//    ArticleArrayAdapter articleArrayAdapter;
+     private ArticleRVAdapter articleAdapter;
+     private RequestParams params = new RequestParams();
+     ArrayList<Article> results = null;
+-    private SwipeRefreshLayout swipeContainer;
+ 
+-    private RecyclerView recyclerView;
++    @Nullable @Bind(R.id.rvArticles) RecyclerView recyclerView;
++    @Nullable @Bind(R.id.toolbar) Toolbar toolbar;
++    @Nullable @Bind(R.id.swipeContainer) SwipeRefreshLayout swipeContainer;
+ 
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_nysearch);
+-        Toolbar toolbar = (Toolbar) findViewById(R.id.actionbar);
++        ButterKnife.bind(this);
+         setSupportActionBar(toolbar);
+-//        gvSearchResults = (GridView) findViewById(R.id.gvsearchresults);
+-        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+-        recyclerView = (RecyclerView) findViewById(R.id.rvArticles);
+ 
+         articles = new ArrayList<>();
+ 
+         articleAdapter = new ArticleRVAdapter(articles,this);
+-        //articleArrayAdapter = new ArticleArrayAdapter(this,articles);
+ 
+         recyclerView.setAdapter(articleAdapter);
+ 
+         // First param is number of columns and second param is orientation i.e Vertical or Horizontal
+         StaggeredGridLayoutManager gridLayoutManager =
+-                new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
++                new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
+         recyclerView.setLayoutManager(gridLayoutManager);
+         recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(gridLayoutManager) {
+             @Override
+@@ -104,7 +99,6 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
+                 android.R.color.holo_orange_light,
+                 android.R.color.holo_red_light);
+ 
+-
+     }
+ 
+     // Append more data into the adapter
+diff --git a/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/adapters/ArticleRVAdapter.java b/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/adapters/ArticleRVAdapter.java
+index 376c628..55edebd 100644
+--- a/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/adapters/ArticleRVAdapter.java
++++ b/NYTimesSearch/app/src/main/java/com/ishan/nytimessearch/adapters/ArticleRVAdapter.java
+@@ -4,13 +4,13 @@ import android.content.Context;
+ import android.content.Intent;
+ import android.graphics.Bitmap;
+ import android.graphics.drawable.Drawable;
++import android.support.annotation.Nullable;
+ import android.support.v7.widget.RecyclerView;
+ import android.text.TextUtils;
+ import android.util.Log;
+ import android.view.LayoutInflater;
+ import android.view.View;
+ import android.view.ViewGroup;
+-import android.widget.Button;
+ import android.widget.ImageView;
+ import android.widget.TextView;
+ 
+@@ -24,6 +24,9 @@ import com.squareup.picasso.Target;
+ 
+ import java.util.List;
+ 
++import butterknife.Bind;
++import butterknife.ButterKnife;
++
+ 
+ public class ArticleRVAdapter extends RecyclerView.Adapter<ArticleRVAdapter.ViewHolder>{
+     // Store a member variable for the contacts
+@@ -99,8 +102,8 @@ public class ArticleRVAdapter extends RecyclerView.Adapter<ArticleRVAdapter.View
+     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,Target{
+         // Your holder should contain a member variable
+         // for any view that will be set as you render a row
+-        public TextView tvTitle;
+-        public DynamicHeightImageView imageView;
++        @Nullable @Bind(R.id.tvTitle) TextView tvTitle;
++        @Nullable @Bind(R.id.ivImage) DynamicHeightImageView imageView;
+ 
+         public Context context;
+ 
+@@ -110,10 +113,8 @@ public class ArticleRVAdapter extends RecyclerView.Adapter<ArticleRVAdapter.View
+             // Stores the itemView in a public final member variable that can be used
+             // to access the context from any ViewHolder instance.
+             super(itemView);
+-
++            ButterKnife.bind(this,itemView);
+             // Lookup view for data population
+-            tvTitle = (TextView) itemView.findViewById(R.id.tvTitle);
+-            imageView = (DynamicHeightImageView) itemView.findViewById(R.id.ivImage);
+             itemView.setOnClickListener(this);
+             this.context = context;
+         }

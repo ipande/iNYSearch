@@ -22,6 +22,8 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ishan.nytimessearch.R;
 import com.ishan.nytimessearch.adapters.ArticleRVAdapter;
 import com.ishan.nytimessearch.fragments.DatePickerFragment;
@@ -141,6 +143,8 @@ public class NYSearchActivity extends AppCompatActivity implements FilterSearchF
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         Log.d(APP_NAME, "response: " + response);
+                        Gson gson = new GsonBuilder().create();
+
                         JSONArray articleJSONResults = null;
                         try {
                             articleJSONResults = response.getJSONObject("response").getJSONArray("docs");
